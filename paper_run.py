@@ -1,3 +1,4 @@
+from models.discriminator import Discriminator
 from models.generator import Generator
 from agents.agent import Agent
 from trainer import Trainer
@@ -17,6 +18,7 @@ def main(game_name, game_length):
 	dropout = .2
 	lr = .0001
 	gen = Generator(latent_shape, env, 'pixel', dropout, lr)
+	disc = Discriminator(lr)
 
 	#Agent
 	num_processes = 16
@@ -43,7 +45,7 @@ def main(game_name, game_length):
 	load_version = 0
 	notes = 'Configured to match paper results'
 	agent.writer.add_hparams({'Experiment': experiment, 'RL_LR':lr, 'Minibatch':gen_batch, 'RL_Steps': rl_batch, 'Notes':notes}, {})
-	t = Trainer(gen, agent, experiment, load_version, elite_mode, elite_persist)
+	t = Trainer(gen, agent, disc, experiment, load_version, elite_mode, elite_persist)
 	t.train(gen_updates, gen_batch, gen_batches, diversity_batches, rl_batch, pretrain)
 
 if(__name__ == "__main__"):

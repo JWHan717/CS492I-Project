@@ -12,6 +12,7 @@ import torch.nn.functional as F
 
 from torchvision.utils import make_grid
 import level_visualizer
+import models.discriminator
 
 import distributionLoss
 
@@ -19,9 +20,10 @@ import pdb
 
 
 class Trainer(object):
-    def __init__(self, gen, agent, save, version=0, elite_mode='max', elite_persist=True):
+    def __init__(self, gen, disc, agent, save, version=0, elite_mode='max', elite_persist=True):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.generator = gen.to(self.device)
+        self.disc = disc.to(self.device)
         self.gen_optimizer = gen.optimizer
         self.agent = agent
         self.loss = F.mse_loss #lambda x, y: (x.mean() - 0).pow(2) + (x.std() - .3).pow(2) #distributionLoss.NormalDivLoss().to(self.device)
@@ -209,6 +211,9 @@ class Trainer(object):
         #scale.to(self.device)
         #scale_optim = torch.optim.Adam(scale.parameters(), lr=1e-4) #scale debug
 
+        real_label = 1.
+        fake_label = 0.
+
         loss = 0
         entropy = 0
         gen_updates = 0
@@ -227,6 +232,25 @@ class Trainer(object):
                 levels, _ = self.new_levels(z(8))
                 lvl_imgs = [np.array(self.level_visualizer.draw_level(lvl))/255.0 for lvl in levels]
                 generated_levels = lvl_imgs
+                
+                # label = torch_full((len(generated_levels),), real_label, dtype=torch.float, device=self.device)
+
+                # for level in generated_levels:
+                #     self.disc.zero_grad()
+                #     pred_real = self.disc(level)
+                #     label
+                #     loss_d_real = criterion(pred_real, labels)
+                #     loss_d_real.backward()
+
+                #     z.data.normal_(0, 1)
+                #     fake = generator.forward(z).detach()
+                #     pred_fake = discriminator(fake)
+                #     labels.data.fill_(0.0)
+                #     loss_d_fake = criterion(pred_fake, labels)
+                #     loss_d_fake.backward()
+
+                #     loss_d = loss_d_real + loss_d_fake
+                #     opt_d.step()
 
                 self.gen_optimizer.zero_grad()
                 #scale_optim.zero_grad() #scale
