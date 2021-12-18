@@ -232,9 +232,11 @@ class Trainer(object):
                 
                 for level in generated_levels:
                     self.agent.label.fill_(self.disc.fake_label)
+                    tf = torch.Resize((48, 64))
                     level_t = torch.tensor(level).transpose(0, 1).transpose(0, 2)
-                    level_t = level_t.unsqueeze(0).to(self.device)
+                    level_t = tf(level_t).unsqueeze(0).type(torch.FloatTensor).to(self.device)
                     output = self.disc(level_t.detach()).view(-1)
+                    print(output.shape)
                     errD_fake = self.disc.criterion(output, self.agent.label)
                     errD_fake.backward()
                     D_G_z1 = output.mean().item()
