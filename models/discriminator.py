@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torchvision.transforms as transforms
 
 from functools import reduce
 from operator import mul
@@ -11,7 +10,7 @@ class Discriminator(nn.Module):
     def __init__(self, lr):
         super(Discriminator, self).__init__()
         nc = 3
-        ndf = 64
+        ndf = 12
 
         #self.init_shape = (filters, shapes[0][0], shapes[0][1])
         #self.preprocess = nn.Sequential(
@@ -19,18 +18,18 @@ class Discriminator(nn.Module):
         #    nn.ReLU(True))
 
         self.main = nn.Sequential(
-            nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
+            nn.Conv2d(nc, ndf, (48, 64), 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(ndf, ndf*2, 4, 2, 1, bias=False),
+            nn.Conv2d(ndf, ndf*2, (48, 64), 2, 1, bias=False),
             nn.BatchNorm2d(ndf*2),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(ndf*2, ndf*4, 4, 2, 1, bias=False),
+            nn.Conv2d(ndf*2, ndf*4, (48, 64), 2, 1, bias=False),
             nn.BatchNorm2d(ndf*4),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(ndf*4, ndf*8, 4, 2, 1, bias=False),
+            nn.Conv2d(ndf*4, ndf*8, (48, 64), 2, 1, bias=False),
             nn.BatchNorm2d(ndf*8),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(ndf*8, 1, 4, 1, 0, bias=False),
+            nn.Conv2d(ndf*8, 1, (48, 64), 1, 0, bias=False),
             nn.Sigmoid()
         )
         

@@ -13,6 +13,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torchvision.transforms as transforms
 
 from a2c_ppo_acktr import algo, utils
 from a2c_ppo_acktr.algo import gail
@@ -423,6 +424,11 @@ class Agent:
         
         # Train discriminator with 'real' data
         self.disc.zero_grad()
+        # [480, 640, 3] -> [1, 3, 48, 64]
+        tf = transforms.Resize((48, 64))
+        env_img = env_img.transpose(0, 1).transpose(0, 2)
+        env_img.to(self.device)
+        env_img = tf(env_img).unsqueeze(0)
         self.label = torch.full((env_img.size(0),), self.disc.real_label, dtype=torch.float, device=self.device)
         output = self.disc(env_img).view(-1)
         self.errD_real = self.disc.criterion(output, self.label)
