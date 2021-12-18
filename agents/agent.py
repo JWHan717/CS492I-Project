@@ -115,6 +115,7 @@ class Agent:
                              'dropout': dropout},
                 model=architecture)
         self.actor_critic.to(self.device)
+        self.disc.to(self.device)
 
         #Reconstruction
         self.reconstruct = reconstruct is not None
@@ -427,10 +428,9 @@ class Agent:
         # [480, 640, 3] -> [1, 3, 48, 64]
         tf = transforms.Resize((48, 64))
         env_img = env_img.transpose(0, 1).transpose(0, 2)
-        env_img.to(self.device)
-        env_img = tf(env_img).unsqueeze(0)
+        env_img = tf(env_img).unsqueeze(0).to(self.device)
         self.label = torch.full((env_img.size(0),), self.disc.real_label, dtype=torch.float, device=self.device)
-        output = self.disc(env_img).view(-1)
+        output = self.disc(env_img.type(torch.FloatTensor)).view(-1)
         self.errD_real = self.disc.criterion(output, self.label)
         self.errD_real.backward()
         D_x = output.mean().item()
