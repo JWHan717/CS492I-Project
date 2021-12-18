@@ -31,7 +31,7 @@ def main(game_name, game_length):
 	Agent.num_steps = 5
 	Agent.entropy_coef = .01
 	Agent.value_loss_coef = .1
-	agent = Agent(env, num_processes, experiment, 0, lr, model, dropout, reconstruct, r_weight)
+	agent = Agent(env, disc, num_processes, experiment, 0, lr, model, dropout, reconstruct, r_weight)
 
 	#Training
 	gen_updates = 100
@@ -39,8 +39,8 @@ def main(game_name, game_length):
 	gen_batches = 10
 	diversity_batches = 90
 	# These values are adjusted due to the limitations in runtime.
-	rl_batch = 5e3   # original value: 1e6
-	pretrain = 1e5   # original value: 2e7
+	rl_batch = 1e1   # original value: 1e6 / 5e3
+	pretrain = 2e2   # original value: 2e7 / 1e5
 	elite_persist = True
 	elite_mode = 'max'
 	load_version = 0

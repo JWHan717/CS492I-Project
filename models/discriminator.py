@@ -35,12 +35,10 @@ class Discriminator(nn.Module):
         )
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        self.criterion = nn.BCELoss()
+
+        self.real_label = 1.
+        self.fake_label = 0.
 
     def forward(self, level):
-        tf = transforms.ToTensor()
-        level_t = tf(level)
-
-        return self.main(level_t)
-
-
-        
+        return self.main(level)

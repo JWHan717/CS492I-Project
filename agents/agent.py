@@ -69,8 +69,9 @@ class Agent:
     gail_batch_size = 128
     gail_epoch = 5
 
-    def __init__(self, env_def, processes=1, dir='.', version=0, lr=2e-4, architecture='base', dropout=0, reconstruct=None, r_weight=.05):
+    def __init__(self, env_def, discriminator, processes=1, dir='.', version=0, lr=2e-4, architecture='base', dropout=0, reconstruct=None, r_weight=.05):
         self.env_def = env_def
+        self.disc = discriminator
         self.num_processes = processes #cpu processes
         self.lr = lr
         self.version = version
@@ -295,8 +296,7 @@ class Agent:
 
     def train_agent(self, num_env_steps):
         env_name = self.env_def.name
-        env_img = self.env_def.render(mode="rgb_array")
-        print(env_img)
+        env_img = torch.from_numpy(self.envs.render(mode="rgb_array"))
 
         obs = self.envs.reset()
         self.rollouts.obs[0].copy_(obs)
@@ -420,3 +420,12 @@ class Agent:
                             np.median(episode_rewards), np.min(episode_rewards),
                             np.max(episode_rewards), dist_entropy, value_loss,
                             action_loss))
+        
+        # Train discriminator with 'real' data
+        self.disc.zero_grad()
+        self.label = torch.full((env_img.size(0),), self.disc.real_label, dtype=torch.float, device=self.device)
+        output = self.disc(env_img).view(-1)
+        self.errD_real = self.disc.criterion(output, self.label)
+        self.errD_real.backward()
+        D_x = output.mean().item()
+        print("D(x): %.4f".format(D_x))

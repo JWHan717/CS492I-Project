@@ -20,7 +20,7 @@ import pdb
 
 
 class Trainer(object):
-    def __init__(self, gen, disc, agent, save, version=0, elite_mode='max', elite_persist=True):
+    def __init__(self, gen, agent, disc, save, version=0, elite_mode='max', elite_persist=True):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.generator = gen.to(self.device)
         self.disc = disc.to(self.device)
@@ -211,10 +211,6 @@ class Trainer(object):
         #scale.to(self.device)
         #scale_optim = torch.optim.Adam(scale.parameters(), lr=1e-4) #scale debug
 
-        real_label = 1.
-        fake_label = 0.
-        criterion = nn.BCELoss()
-
         loss = 0
         entropy = 0
         gen_updates = 0
@@ -234,31 +230,27 @@ class Trainer(object):
                 lvl_imgs = [np.array(self.level_visualizer.draw_level(lvl))/255.0 for lvl in levels]
                 generated_levels = lvl_imgs
                 
-                label = torch.full((len(generated_levels),), real_label, dtype=torch.float, device=self.device)
-
                 for level in generated_levels:
-                    self.disc.zero_grad()
-                    pred_real = self.disc(level).view(-1)
-                    loss_d_real = criterion(pred_real, label)
-                    loss_d_real.backward()
-                    D_x = pred_real.mean().item()
+                    self.agent.label.fill_(self.disc.fake_label)
+                    output = self.disc(level.detach()).view(-1)
+                    errD_fake = self.disc.criterion(output, self.agent.label)
+                    errD_fake.backward()
+                    D_G_z1 = output.mean().item()
 
-                    noise = torch.randn(batch_size, 512, 1, 1, device=self.device)
-                    fake = self.generator.forward(z).detach()
-                    pred_fake = self.disc(fake)
-                    label.data.fill_(0.0)
-                    loss_d_fake = criterion(pred_fake, label)
-                    loss_d_fake.backward()
-
-                    loss_d = loss_d_real + loss_d_fake
+                    errD = self.agent.errD_real + errD_fake
                     self.disc.optimizer.step()
 
+                    print("D(G(z1)): %.4f\tLoss_D: %.4f".format(D_G_z1, errD))
+
                 self.gen_optimizer.zero_grad()
+                self.agent.label.fill_(self.disc.real_label)
                 #scale_optim.zero_grad() #scale
                 noise = z()
                 levels = self.generator(noise)
                 states = self.generator.adapter(levels)
+                output = self.disc(levels).view(-1)
                 expected_value, dist, hidden = self.critic(states)
+                errG = self.disc.criterion(output, self.agent.label)
                 #diversity = (states[:-1] - states[1:]).pow(2).mean()
                 diversity = (hidden[:-1] - hidden[1:]).pow(2).mean()
                 target = torch.zeros_like(expected_value) #was ones like
@@ -270,9 +262,9 @@ class Trainer(object):
                 gen_loss = self.loss(expected_value, target)
                 div_loss = -diversity
                 if(i < gen_batches):
-                     loss = gen_loss
+                     loss = gen_loss + errG
                 else:
-                     loss = div_loss
+                     loss = div_loss + errG
                 loss.backward()
                 self.gen_optimizer.step()
                 #scale_optim.step()  #scale
