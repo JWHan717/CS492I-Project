@@ -213,6 +213,7 @@ class Trainer(object):
 
         real_label = 1.
         fake_label = 0.
+        criterion = nn.BCELoss()
 
         loss = 0
         entropy = 0
@@ -233,24 +234,24 @@ class Trainer(object):
                 lvl_imgs = [np.array(self.level_visualizer.draw_level(lvl))/255.0 for lvl in levels]
                 generated_levels = lvl_imgs
                 
-                # label = torch_full((len(generated_levels),), real_label, dtype=torch.float, device=self.device)
+                label = torch.full((len(generated_levels),), real_label, dtype=torch.float, device=self.device)
 
-                # for level in generated_levels:
-                #     self.disc.zero_grad()
-                #     pred_real = self.disc(level)
-                #     label
-                #     loss_d_real = criterion(pred_real, labels)
-                #     loss_d_real.backward()
+                for level in generated_levels:
+                    self.disc.zero_grad()
+                    pred_real = self.disc(level).view(-1)
+                    loss_d_real = criterion(pred_real, label)
+                    loss_d_real.backward()
+                    D_x = pred_real.mean().item()
 
-                #     z.data.normal_(0, 1)
-                #     fake = generator.forward(z).detach()
-                #     pred_fake = discriminator(fake)
-                #     labels.data.fill_(0.0)
-                #     loss_d_fake = criterion(pred_fake, labels)
-                #     loss_d_fake.backward()
+                    noise = torch.randn(batch_size, 512, 1, 1, device=self.device)
+                    fake = self.generator.forward(z).detach()
+                    pred_fake = self.disc(fake)
+                    label.data.fill_(0.0)
+                    loss_d_fake = criterion(pred_fake, label)
+                    loss_d_fake.backward()
 
-                #     loss_d = loss_d_real + loss_d_fake
-                #     opt_d.step()
+                    loss_d = loss_d_real + loss_d_fake
+                    self.disc.optimizer.step()
 
                 self.gen_optimizer.zero_grad()
                 #scale_optim.zero_grad() #scale

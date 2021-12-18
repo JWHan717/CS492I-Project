@@ -134,7 +134,5 @@ class LevelVisualizer:
             for x,c in enumerate(r):
                 img = self.tiles[c]
                 lvl_img.paste(img, (p + x*ts, p + y*ts, p + (x+1)*ts, p + (y+1)*ts))
-        
-        lvl_img.show()
 
         return lvl_img

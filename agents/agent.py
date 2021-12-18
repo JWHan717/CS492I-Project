@@ -295,6 +295,8 @@ class Agent:
 
     def train_agent(self, num_env_steps):
         env_name = self.env_def.name
+        env_img = self.env_def.render(mode="rgb_array")
+        print(env_img)
 
         obs = self.envs.reset()
         self.rollouts.obs[0].copy_(obs)

@@ -38,8 +38,9 @@ def main(game_name, game_length):
 	gen_batch = 128
 	gen_batches = 10
 	diversity_batches = 90
-	rl_batch = 1e6
-	pretrain = 2e7
+	# These values are adjusted due to the limitations in runtime.
+	rl_batch = 5e3   # original value: 1e6
+	pretrain = 1e5   # original value: 2e7
 	elite_persist = True
 	elite_mode = 'max'
 	load_version = 0
