@@ -232,7 +232,9 @@ class Trainer(object):
                 
                 for level in generated_levels:
                     self.agent.label.fill_(self.disc.fake_label)
-                    output = self.disc(level.detach()).view(-1)
+                    level_t = torch.tensor(level).transpose(0, 1).transpose(0, 2)
+                    level_t = level_t.unsqueeze(0).to(self.device)
+                    output = self.disc(level_t.detach()).view(-1)
                     errD_fake = self.disc.criterion(output, self.agent.label)
                     errD_fake.backward()
                     D_G_z1 = output.mean().item()
@@ -240,7 +242,7 @@ class Trainer(object):
                     errD = self.agent.errD_real + errD_fake
                     self.disc.optimizer.step()
 
-                    print("D(G(z1)): %.4f\tLoss_D: %.4f".format(D_G_z1, errD))
+                    print("D(G(z1)): %.4f\tLoss_D: %.4f" % (D_G_z1, errD))
 
                 self.gen_optimizer.zero_grad()
                 self.agent.label.fill_(self.disc.real_label)

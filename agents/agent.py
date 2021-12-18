@@ -434,4 +434,4 @@ class Agent:
         self.errD_real = self.disc.criterion(output, self.label)
         self.errD_real.backward()
         D_x = output.mean().item()
-        print("D(x): %.4f".format(D_x))
+        print("D(x): %.4f" % (D_x))
