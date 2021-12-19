@@ -42,7 +42,8 @@ With Agent-Discriminator structure
 ![Sample Generated Levels](With_gen_99.png)
 
 
-## Notes
+## Notes of Disclaimer
+This repository was built over a distributed model with the MIT License.
 The files modified from the original network are:
 ```bash
 trainer.py
