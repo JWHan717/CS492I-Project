@@ -51,10 +51,10 @@ This repository was built over a distributed model with the MIT License. There i
 
 The files modified from the original network are:
 ```bash
-trainer.py
-run.py
-models/discriminator.py
-agents/agent.py
+trainer.py (lines 234-249)
+run.py (identical to paper_run.py from original, adjusted step and added discriminator)
+models/discriminator.py (entire file)
+agents/agent.py (lines 426-437)
 ```
 
 
