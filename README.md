@@ -1,7 +1,8 @@
-# Modified Generative Playing Networks
+# Modified Generative Playing Networks: Agent-Discriminator GAN
 Original implementation adopted from [Generative Playing Networks](https://github.com/pbontrager/GenerativePlayingNetworks)
 
 ![Algorithm Diagram](genplayingnets.png)
+
 
 # Install
 
@@ -35,15 +36,19 @@ cd pytorch-a2c-ppo-acktr-gail
 pip install -e .
 ```
 
+
 ## Sample Output
 Without Agent-Discriminator structure
+![Sample-A](Without_gen_99.png)
 
 With Agent-Discriminator structure
-![Sample Generated Levels](With_gen_99.png)
+![Sample-AD](With_gen_99.png)
 
 
 ## Notes of Disclaimer
-This repository was built over a distributed model with the MIT License.
+This repository was built over a distributed model with the MIT License. There is no intention to make profit out of this work.
+
+
 The files modified from the original network are:
 ```bash
 trainer.py
@@ -52,6 +57,12 @@ models/discriminator.py
 agents/agent.py
 ```
 
+
 ## Trained models
 The models are too large to upload to Github, so links to Google Drive is provided as follows.
-[A-D model](https://drive.google.com/file/d/1iT1K6Slb2O2NrW_pb-02s_Q5HnNppKWd/view?usp=sharing)
+
+
+* [A-D model](https://drive.google.com/file/d/1iT1K6Slb2O2NrW_pb-02s_Q5HnNppKWd/view?usp=sharing)
+
+
+Recorded data for previous runs can be found in the ```runs``` directory. It supports Tensorboard for scalars and images.
