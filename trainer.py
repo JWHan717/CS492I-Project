@@ -9,6 +9,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.transforms as transforms
 
 from torchvision.utils import make_grid
 import level_visualizer
@@ -232,11 +233,12 @@ class Trainer(object):
                 
                 for level in generated_levels:
                     self.agent.label.fill_(self.disc.fake_label)
-                    tf = torch.Resize((48, 64))
+                    self.disc.optimizer.zero_grad()
+                    tf = transforms.Resize((48, 64))
                     level_t = torch.tensor(level).transpose(0, 1).transpose(0, 2)
                     level_t = tf(level_t).unsqueeze(0).type(torch.FloatTensor).to(self.device)
                     output = self.disc(level_t.detach()).view(-1)
-                    print(output.shape)
+                    # print(output.shape)
                     errD_fake = self.disc.criterion(output, self.agent.label)
                     errD_fake.backward()
                     D_G_z1 = output.mean().item()
@@ -244,7 +246,7 @@ class Trainer(object):
                     errD = self.agent.errD_real + errD_fake
                     self.disc.optimizer.step()
 
-                    print("D(G(z1)): %.4f\tLoss_D: %.4f" % (D_G_z1, errD))
+                    # print("D(G(z1)): %.4f\tLoss_D: %.4f" % (D_G_z1, errD))
 
                 self.gen_optimizer.zero_grad()
                 self.agent.label.fill_(self.disc.real_label)
@@ -252,9 +254,7 @@ class Trainer(object):
                 noise = z()
                 levels = self.generator(noise)
                 states = self.generator.adapter(levels)
-                output = self.disc(levels).view(-1)
                 expected_value, dist, hidden = self.critic(states)
-                errG = self.disc.criterion(output, self.agent.label)
                 #diversity = (states[:-1] - states[1:]).pow(2).mean()
                 diversity = (hidden[:-1] - hidden[1:]).pow(2).mean()
                 target = torch.zeros_like(expected_value) #was ones like
@@ -266,9 +266,9 @@ class Trainer(object):
                 gen_loss = self.loss(expected_value, target)
                 div_loss = -diversity
                 if(i < gen_batches):
-                     loss = gen_loss + errG
+                     loss = gen_loss
                 else:
-                     loss = div_loss + errG
+                     loss = div_loss
                 loss.backward()
                 self.gen_optimizer.step()
                 #scale_optim.step()  #scale

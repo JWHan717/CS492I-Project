@@ -36,9 +36,21 @@ pip install -e .
 ```
 
 ## Sample Output
+Without Agent-Discriminator structure
 
-![Sample Generated Levels](gen_sample.png)
+With Agent-Discriminator structure
+![Sample Generated Levels](With_gen_99.png)
 
-## Disclaimer
-Current default parameters are different from the paper and as such the results will look different.
-To get the results from the paper, run 'paper_run.py' instead.
+
+## Notes
+The files modified from the original network are:
+```bash
+trainer.py
+run.py
+models/discriminator.py
+agents/agent.py
+```
+
+## Trained models
+The models are too large to upload to Github, so links to Google Drive is provided as follows.
+[A-D model](https://drive.google.com/file/d/1iT1K6Slb2O2NrW_pb-02s_Q5HnNppKWd/view?usp=sharing)
